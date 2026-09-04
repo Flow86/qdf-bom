@@ -134,6 +134,14 @@ def test_clamp2(parser: QdfParser) -> None:
     assert len(clamps) == 1
 
 
+def test_clip2(parser: QdfParser) -> None:
+    records = parser.parse(CONNECTOR_LINES)
+    specials = [r for r in records if isinstance(r, SpecialPartRecord)]
+    clips = [s for s in specials if s.element_name == "clip2"]
+    assert len(clips) == 1
+    assert clips[0].mat_id == 1
+
+
 # ---------------------------------------------------------------------------
 # Unknown elements
 # ---------------------------------------------------------------------------
@@ -144,6 +152,12 @@ def test_unknown_element(parser: QdfParser) -> None:
     unknown = [r for r in records if isinstance(r, UnknownRecord)]
     assert len(unknown) == 1
     assert unknown[0].element_name == "wood2"
+
+
+def test_non_element_line_ignored(parser: QdfParser) -> None:
+    # Lines that don't match "name{...}" syntax produce no records
+    records = parser.parse("this is not a qdf element\n")
+    assert records == []
 
 
 def test_camera_skipped(parser: QdfParser) -> None:

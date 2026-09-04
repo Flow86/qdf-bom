@@ -190,7 +190,7 @@ class PartsCatalog:
         (where sys._MEIPASS points to the unpacked temp directory).
         """
         import sys
-        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):  # pragma: no cover
             base = Path(sys._MEIPASS)
         else:
             base = Path(__file__).parent.parent

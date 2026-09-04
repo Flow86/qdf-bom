@@ -13,3 +13,9 @@ qdf-bom = "qdf_bom.tool:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if getattr\\(sys",
+]

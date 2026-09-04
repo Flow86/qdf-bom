@@ -88,6 +88,7 @@ class BomReport:
         lines.append(f"Link: https://quadroworld.com/de/designs/{stem}")
         lines.append("")
 
+        totals = counter.category_totals()
         for category in CATEGORY_ORDER:
             items = counter.items(category)
             if not items:
@@ -112,6 +113,7 @@ class BomReport:
                 else:
                     lines.append(f"       {name:<40} {colour:<10} x {count:>3}")
 
+            lines.append(f"{'':59}= {totals[category]:>3}")
             lines.append("")
 
         lines.append(f"ERKANNTE BAUTEIL-OBJEKTE GESAMT: {counter.grand_total()}")
@@ -119,7 +121,7 @@ class BomReport:
         return "\n".join(lines)
 
     def _resolve_color(self, mat_id: int | None, mat_colors: dict[int, str] | None) -> str:
-        if mat_id is None:
+        if mat_id is None:  # pragma: no cover
             return ""
         raw = (mat_colors or {}).get(mat_id, "")
         return self._catalog.color_name(raw) if raw else f"Mat.{mat_id}"

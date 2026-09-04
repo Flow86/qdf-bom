@@ -60,3 +60,17 @@ def test_elbow_90(classifier: ConnectorClassifier) -> None:
 
 def test_zero_mask_unknown(classifier: ConnectorClassifier) -> None:
     assert classifier.classify(0) == "connector_unknown"
+
+
+def test_one_arm_hits_special_connector(classifier: ConnectorClassifier) -> None:
+    # Single arm: skips space/planar/2-arm checks, hits special catch-all.
+    # The catalog has a 1-arm special connector (diagonal / C45).
+    mask = 1 << 0  # only +X socket
+    assert classifier.classify(mask) == "diagonal"
+
+
+def test_impossible_arm_count_unknown(classifier: ConnectorClassifier) -> None:
+    # All 12 bits set → arms=12; no 12-arm connector exists in catalog
+    # → traverses special catch-all and falls through to connector_unknown (line 71)
+    mask = (1 << 12) - 1  # bits 0-11
+    assert classifier.classify(mask) == "connector_unknown"

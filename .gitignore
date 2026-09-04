@@ -5,3 +5,6 @@ qdf/*_partslist.pdf
 qdf/*_partslist.txt
 .coverage
 coverage
+dist
+build
+qdf-bom.spec

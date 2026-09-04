@@ -30,6 +30,7 @@ jobs:
       - uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # -----------------------------------------------------------------------
   # Standalone executables (runs only after tests pass)

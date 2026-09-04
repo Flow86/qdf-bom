@@ -22,10 +22,14 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install
-        run: pip install -e . pytest
+        run: pip install -e . pytest pytest-cov
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: pytest tests/ -v --cov=qdf_bom --cov-branch --cov-report=term-missing --cov-report=xml
+
+      - uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
 
   # -----------------------------------------------------------------------
   # Standalone executables (runs only after tests pass)

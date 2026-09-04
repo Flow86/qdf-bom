@@ -1,5 +1,8 @@
 # qdf-bom – QUADRO Stücklisten-Generator
 
+[![CI](https://github.com/Flow86/qdf-bom/actions/workflows/ci.yml/badge.svg)](https://github.com/Flow86/qdf-bom/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Flow86/qdf-bom/graph/badge.svg)](https://codecov.io/gh/Flow86/qdf-bom)
+
 Liest `.qdf`-Dateien (proprietäres Format der QUADRO 3D-Software) und erzeugt
 eine strukturierte Stückliste (Bill of Materials) aller verwendeten QUADRO-Bauteile.
 

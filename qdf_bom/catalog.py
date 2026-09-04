@@ -184,9 +184,17 @@ class PartsCatalog:
 
     @classmethod
     def from_default(cls) -> "PartsCatalog":
-        """Load from data/parts.json relative to this package's parent."""
-        here = Path(__file__).parent.parent
-        return cls.from_file(here / "data" / "parts.json")
+        """Load from data/parts.json.
+
+        Supports both normal install and PyInstaller one-file bundles
+        (where sys._MEIPASS points to the unpacked temp directory).
+        """
+        import sys
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            base = Path(sys._MEIPASS)
+        else:
+            base = Path(__file__).parent.parent
+        return cls.from_file(base / "data" / "parts.json")
 
 
 # ------------------------------------------------------------------

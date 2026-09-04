@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Tests müssen vor dem Release grün sein
+  # -----------------------------------------------------------------------
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e . pytest
+
+      - run: pytest tests/ -v
+
+  # -----------------------------------------------------------------------
+  # Executables bauen
+  # -----------------------------------------------------------------------
+  build:
+    name: Build (${{ matrix.os }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: qdf-bom-linux
+            exe: dist/qdf-bom
+          - os: windows-latest
+            artifact: qdf-bom-windows
+            exe: dist/qdf-bom.exe
+          - os: macos-latest
+            artifact: qdf-bom-macos
+            exe: dist/qdf-bom
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set version from tag
+        run: |
+          python - <<'EOF'
+          import re, sys
+          tag = "${{ github.ref_name }}"          # e.g. "v1.0.0"
+          version = tag.lstrip("v")               # → "1.0.0"
+          content = open("pyproject.toml").read()
+          content = re.sub(r'^version = ".*"', f'version = "{version}"', content, flags=re.MULTILINE)
+          open("pyproject.toml", "w").write(content)
+          print(f"version set to {version}")
+          EOF
+
+      - run: pip install -e . pyinstaller fpdf2
+
+      - name: Build (Linux / macOS)
+        if: runner.os != 'Windows'
+        run: |
+          pyinstaller --onefile --name qdf-bom \
+            --add-data "data/parts.json:data" \
+            qdf_bom/__main__.py
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          pyinstaller --onefile --name qdf-bom `
+            --add-data "data/parts.json;data" `
+            qdf_bom/__main__.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.exe }}
+          if-no-files-found: error
+
+  # -----------------------------------------------------------------------
+  # GitHub Release erstellen und Executables anhängen
+  # -----------------------------------------------------------------------
+  release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: qdf-bom-linux
+          path: release/linux/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: qdf-bom-windows
+          path: release/windows/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: qdf-bom-macos
+          path: release/macos/
+
+      - name: Collect executables
+        run: |
+          mkdir dist
+          cp release/linux/qdf-bom        dist/qdf-bom-linux
+          cp release/windows/qdf-bom.exe  dist/qdf-bom-windows.exe
+          cp release/macos/qdf-bom        dist/qdf-bom-macos
+          chmod +x dist/qdf-bom-linux dist/qdf-bom-macos
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

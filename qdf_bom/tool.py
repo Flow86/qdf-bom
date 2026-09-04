@@ -6,6 +6,12 @@ import sys
 from pathlib import Path
 
 from .bom import BomCounter, BomReport
+
+try:
+    from .pdf_export import save_pdf as _save_pdf
+    _PDF_AVAILABLE = True
+except ImportError:
+    _PDF_AVAILABLE = False
 from .catalog import PartsCatalog
 from .classifier import ConnectorClassifier
 from .parser import (
@@ -187,5 +193,12 @@ def main(argv: list[str] | None = None) -> int:
         out = path.with_name(path.stem + "_partslist.txt")
         out.write_text(report + "\n", encoding="utf-8")
         print(f"Gespeichert: {out}", file=sys.stderr)
+
+        if _PDF_AVAILABLE:
+            out_pdf = path.with_name(path.stem + "_partslist.pdf")
+            _save_pdf(report, out_pdf)
+            print(f"Gespeichert: {out_pdf}", file=sys.stderr)
+        else:
+            print("PDF-Export übersprungen (fpdf2 nicht installiert).", file=sys.stderr)
 
     return 0

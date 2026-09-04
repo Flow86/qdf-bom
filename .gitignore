@@ -1,4 +1,5 @@
 ﻿3rdparty
 __pycache__
 qdf/*.qdf
+qdf/*_partslist.pdf
 qdf/*_partslist.txt

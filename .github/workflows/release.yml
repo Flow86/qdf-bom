@@ -51,6 +51,7 @@ jobs:
           python-version: "3.12"
 
       - name: Set version from tag
+        shell: bash
         run: |
           python - <<'EOF'
           import re, sys

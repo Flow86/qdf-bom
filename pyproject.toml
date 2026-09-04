@@ -5,6 +5,9 @@ description = "QUADRO QDF → Stückliste (BOM)"
 requires-python = ">=3.10"
 dependencies = ["fpdf2>=2.7"]
 
+[tool.setuptools.packages.find]
+include = ["qdf_bom*"]
+
 [project.scripts]
 qdf-bom = "qdf_bom.tool:main"
 
